@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Noteo - Bac D</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+    
+    <!-- 1. Le Manifeste (Android & PC Installation) -->
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- 2. Favicon (L'icone de l'onglet sur PC) -->
+    <link rel="icon" type="image/png" href="Icone 32x32.png">
+    
+    <!-- 3. iOS / iPhone (Indispensable pour Apple) -->
+    <link rel="apple-touch-icon" href="Icone 512x512.png">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Noteo">
+
+    <!-- 4. Couleur du thème (Change la couleur de la barre d'adresse du navigateur) -->
+    <meta name="theme-color" content="#4d82dd">
+</head>
+<body>
+
+    <div class="app-layout">
+        
+        <!-- SIDEBAR (Desktop) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-text">Noteo</div>
+            </div>
+
+            <!-- PROFIL / CONNEXION GOOGLE -->
+            <div id="auth-section" style="margin-bottom: 2rem; padding: 0.8rem; background: var(--bg-card); border-radius: 12px; border: 1px solid var(--border); text-align: center;">
+                <button id="btn-login" class="btn-primary" style="padding: 0.6rem; font-size: 0.85rem; background: #bd4929ed;">
+                    🔑 Se connecter avec Google
+                </button>
+                <div id="user-profile" style="display: none; align-items: center; justify-content: space-between; gap: 10px;">
+                    <div style="text-align: left; overflow: hidden;">
+                        <div id="user-name" style="font-weight: bold; font-size: 0.85rem; white-space: nowrap; text-overflow: ellipsis; overflow: hidden;">Nom</div>
+                        <small style="color: var(--success); font-size: 0.75rem;">● Connecté(e)</small>
+                    </div>
+                    <button id="btn-logout" style="background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 1.1rem;" title="Se déconnecter">❌</button>
+                </div>
+            </div>
+
+            <nav class="nav-links">
+                <button class="nav-item active" data-target="section-dashboard">
+                    <img src="icons/home.svg" class="nav-icon" alt="Accueil" onerror="this.style.display='none'"> 
+                    <span>Accueil</span>
+                </button>
+                <button class="nav-item" data-target="section-ajouter" id="nav-btn-ajouter">
+                    <img src="icons/add.svg" class="nav-icon" alt="Saisir" onerror="this.style.display='none'">
+                    <span>Saisir une note</span>
+                </button>
+                <button class="nav-item" data-target="section-bulletin">
+                    <img src="icons/list.svg" class="nav-icon" alt="Bulletin" onerror="this.style.display='none'">
+                    <span>Mon Bulletin</span>
+                </button>
+                <button class="nav-item" data-target="section-stats">
+                    <img src="icons/chart.svg" class="nav-icon" alt="Stats" onerror="this.style.display='none'">
+                    <span>Statistiques</span>
+                </button>
+                <button class="nav-item" data-target="section-objectifs">
+                    <img src="icons/goal.svg" class="nav-icon" alt="Objectifs" onerror="this.style.display='none'">
+                    <span>Objectifs</span>
+                </button>
+            </nav>
+
+        </aside>
+
+        <!-- CONTENU PRINCIPAL -->
+        <main class="main-content">
+            
+            <div class="mobile-header" id="mobile-header">
+                <h1 style="font-size: 1.5rem;">Noteo</h1>
+                
+                <!-- NOUVEAU : Zone de connexion mobile en haut à droite -->
+                <div id="auth-section-mobile" style="display: flex; align-items: center;">
+                    <button id="btn-login-mobile" class="btn-primary" style="padding: 0.4rem 0.8rem; font-size: 0.75rem; background: #bd4929ed;">
+                        🔑 Connexion
+                    </button>
+                    <div id="user-profile-mobile" style="display: none; align-items: center; gap: 8px;">
+                        <span id="user-name-mobile" style="font-weight: bold; font-size: 0.8rem; color: var(--success);">● Connecté(e)</span>
+                        <button id="btn-logout-mobile" style="background: none; border: none; cursor: pointer; font-size: 1rem;" title="Se déconnecter">❌</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 1. DASHBOARD -->
+            <section id="section-dashboard" class="page-section active">
+                <header class="section-header">
+                    <h1>Tableau de bord</h1>
+                    <p>Ta progression annuelle</p>
+                </header>
+
+                <div class="dashboard-grid">
+                    <div class="card main-stat-card">
+                        <h3>Moyenne Annuelle</h3>
+                        <div class="big-average" id="dashboard-general-avg">--/20</div>
+                    </div>
+
+                    <div class="card warning-card">
+                        <h3>⚠️ Points de vigilance</h3>
+                        <div id="vigilance-container" class="vigilance-list"></div>
+                    </div>
+                </div>
+
+                <div class="card quote-card">
+                    <div class="quote-content">
+                        <h4>💡 Conseil du jour</h4>
+                        <p id="random-quote">"Le succès est la somme de petits efforts répétés jour après jour."</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 2. SAISIE -->
+            <section id="section-ajouter" class="page-section">
+                <header class="section-header">
+                    <h1 id="form-title">Nouvelle Note</h1>
+                    <p>Enregistre tes derniers résultats.</p>
+                </header>
+
+                <div class="form-wrapper card">
+                    <form id="suivi-form">
+                        <input type="hidden" id="edit-id">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Trimestre</label>
+                                <select id="trimestre" name="trimestre">
+                                    <option value="1er Trimestre">1er Trimestre</option>
+                                    <option value="2e Trimestre">2e Trimestre</option>
+                                    <option value="3e Trimestre">3e Trimestre</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Matière</label>
+                                <select id="matiere" name="matiere"></select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Sujet / Chapitre</label>
+                            <input type="text" id="chapitre" name="chapitre" placeholder="Ex: Probabilités">
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Note</label>
+                                <input type="number" id="note" name="note" step="0.25" min="0" max="20" required placeholder="15">
+                            </div>
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select id="type-evaluation" name="type-evaluation">
+                                    <option value="devoir">Devoir (/20)</option>
+                                    <option value="interro">Interro (/10)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Commentaire</label>
+                            <textarea id="commentaires" name="commentaires" rows="2" placeholder="Facultatif..."></textarea>
+                        </div>
+                        <div class="switch-container">
+                            <label class="switch">
+                                <input type="checkbox" id="a-revoir" name="a-revoir">
+                                <span class="slider round"></span>
+                            </label>
+                            <span class="switch-label">À revoir absolument ?</span>
+                        </div>
+                        <div class="form-actions">
+                            <button type="submit" class="btn-primary" id="submit-btn">Sauvegarder</button>
+                            <button type="button" class="btn-secondary" id="cancel-btn" style="display:none;">Annuler</button>
+                        </div>
+                    </form>
+                </div>
+            </section>
+
+            <!-- 3. BULLETIN -->
+            <section id="section-bulletin" class="page-section">
+                <header class="section-header">
+                    <h1>Mon Bulletin</h1>
+                    <p>Tes notes détaillées par période.</p>
+                </header>
+
+                <!-- Zone de score dynamique (Fixée pour afficher la moyenne du filtre actuel) -->
+                <div class="card trim-avg-card" id="trim-avg-card">
+                    <div style="display:flex; flex-direction:column;">
+                        <span class="trim-label" id="trim-avg-label">Moyenne</span>
+                        <span id="active-filter-desc" style="font-size: 0.8rem; color: var(--text-muted); margin-top: 4px;">Toutes les matières</span>
+                    </div>
+                    <span class="trim-value" id="trim-avg-value">--/20</span>
+                </div>
+
+                <div class="card">
+                    <div class="filters-toolbar">
+                        <div id="trimestre-filters-container" class="filters-scroll-container"></div>
+                        <div class="matiere-filter-wrapper">
+                            <select id="bulletin-matiere-filter" class="matiere-select">
+                                <option value="all">Toutes les matières</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Matière</th>
+                                    <th>Note</th>
+                                    <th>Info</th>
+                                    <th style="text-align: right;">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="suivi-table-body"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 4. STATISTIQUES -->
+            <section id="section-stats" class="page-section">
+                <header class="section-header">
+                    <h1>Statistiques</h1>
+                    <p>Graphique d'évolution chronologique.</p>
+                </header>
+                <div class="card" style="margin-bottom: 1rem; padding: 1rem;">
+                    <select id="stats-trimestre-select" class="matiere-select" style="width: 100%;">
+                        <option value="1er Trimestre">1er Trimestre</option>
+                        <option value="2e Trimestre">2e Trimestre</option>
+                        <option value="3e Trimestre">3e Trimestre</option>
+                    </select>
+                </div>
+                <div class="card">
+                    <div class="chart-container" style="height: 300px;">
+                        <canvas id="evolution-chart"></canvas>
+                        <p class="empty-state-chart" id="chart-empty-state">Besoin de 2 notes minimum.</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 5. OBJECTIFS (Nouveauté pour remplacer Profil) -->
+            <section id="section-objectifs" class="page-section">
+                <header class="section-header">
+                    <h1>Objectifs BAC 2026</h1>
+                    <p>Définis tes ambitions et suis ton rang virtuel.</p>
+                </header>
+
+                <div class="dashboard-grid">
+                    <div class="card" style="text-align: center;">
+                        <h4 style="color: var(--text-muted);">Moyenne Visée</h4>
+                        <div style="display:flex; align-items:center; justify-content:center; gap:10px; margin:1rem 0;">
+                             <input type="number" id="target-avg" step="0.5" value="14" style="width: 80px; text-align:center; font-size: 1.5rem; font-weight:800; padding:5px;">
+                             <span style="font-size: 1.2rem;">/ 20</span>
+                        </div>
+                        <button class="btn-primary" id="save-target" style="padding: 0.5rem 1rem; font-size: 0.8rem;">Définir l'objectif</button>
+                    </div>
+
+                    <div class="card" style="text-align: center; background: rgba(88, 106, 126, 0.185);">
+                        <h4 style="color: var(--text-muted);">Statut Actuel</h4>
+                        <div id="status-badge" style="margin: 1rem 0; font-size: 1.2rem; font-weight: 700;">--</div>
+                        <p id="status-comment" style="font-size: 0.8rem; color: var(--text-muted);">Complète tes notes pour voir ton statut.</p>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <h3>🏆 Progression vers l'objectif</h3>
+                    <div style="width: 100%; height: 20px; background: var(--bg-app); border-radius: 10px; margin: 1.5rem 0; position: relative; overflow: hidden; border: 1px solid var(--border);">
+                        <div id="progress-bar-fill" style="width: 0%; height: 100%; background: var(--primary); transition: width 0.5s ease;"></div>
+                    </div>
+                    <p id="progress-text" style="text-align: center; font-weight: 500;">0% de l'objectif atteint</p>
+                </div>
+            </section>
+
+        </main>
+        
+        <!-- BARRE DE NAVIGATION MOBILE -->
+        <nav class="bottom-nav-bar" id="bottom-nav-bar">
+            <button class="nav-item active" data-target="section-dashboard">
+                <img src="icons/home.svg" class="nav-icon" alt="Accueil"> 
+                <span>Accueil</span>
+            </button>
+            <button class="nav-item" data-target="section-bulletin">
+                <img src="icons/list.svg" class="nav-icon" alt="Bulletin">
+                <span>Bulletin</span>
+            </button>
+            <button class="nav-item main-action" data-target="section-ajouter">
+                <img src="icons/add.svg" class="nav-icon" alt="Ajouter">
+            </button>
+            <button class="nav-item" data-target="section-stats">
+                <img src="icons/chart.svg" class="nav-icon" alt="Stats">
+                <span>Stats</span>
+            </button>
+            <button class="nav-item" data-target="section-objectifs">
+                <img src="icons/goal.svg" class="nav-icon" alt="Objectifs">
+                <span>Objectifs</span>
+            </button>
+        </nav>
+
+        <!-- MODALE -->
+        <div id="comment-modal" class="modal-overlay">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Détail</h3>
+                    <button id="close-modal" class="close-modal-btn">&times;</button>
+                </div>
+                <div class="modal-body"><p id="modal-text"></p></div>
+                <div class="modal-footer"><span id="modal-matiere" class="modal-badge"></span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODALE CHOIX DE SÉRIE (PREMIÈRE CONNEXION) -->
+    <div id="serie-modal" class="modal-overlay">
+        <div class="modal-content" style="text-align: center; max-width: 350px;">
+            <div class="modal-header" style="justify-content: center; margin-bottom: 0.5rem;">
+                <h2>Bienvenue sur Noteo ! 👋</h2>
+            </div>
+            <div class="modal-body">
+                <p style="margin-bottom: 1.5rem; color: var(--text-muted); font-size: 0.9rem;">
+                    Choisis ta série :
+                </p>
+                <!-- Grille de boutons pour les séries -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                    <button class="btn-primary" onclick="choisirSerie('A1')">Série A1</button>
+                    <button class="btn-primary" onclick="choisirSerie('A2')">Série A2</button>
+                    <button class="btn-primary" onclick="choisirSerie('C')">Série C</button>
+                    <button class="btn-primary" onclick="choisirSerie('D')">Série D</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+
+    <script src="config.js" defer></script>
+    <script type="module" src="script.js"></script>
+</body>
+</html>

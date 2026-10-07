@@ -1,0 +1,89 @@
+Plan de Développement - Phase 2 : De l'Outil Personnel à la Web App Collaborative
+Objectif Final :
+Une application web progressive (PWA) installable, utilisable hors ligne, où plusieurs utilisateurs peuvent se connecter avec leur compte Google pour gérer leur propre suivi scolaire.
+
+Étape 2.1 : Transformation en PWA (Packaging)
+Objectif : Rendre l'application "installable" sur l'écran d'accueil d'un téléphone et lui donner une identité visuelle.
+
+Actions :
+
+Création du Logo :
+
+Utiliser un outil simple comme Canva pour créer un logo (par exemple, un livre ouvert avec un "V" de validation).
+
+Générer les différentes tailles d'icônes nécessaires (un site comme favicon.io peut le faire à partir d'une image).
+
+Création du manifest.json :
+
+C'est la "carte d'identité" de votre PWA. Un fichier qui décrit le nom de l'app, les couleurs, l'icône, et comment elle doit se comporter.
+
+Lien vers le Manifest :
+
+Ajouter une ligne dans le <head> de votre index.html pour lier ce fichier.
+
+Mise en place du Service Worker :
+
+Créer un fichier service-worker.js.
+
+Dans un premier temps, sa seule mission sera de mettre en cache les fichiers principaux de l'application (index.html, style.css, script.js) pour permettre une utilisation hors ligne de base.
+
+"Enregistrer" ce service worker dans votre script.js.
+
+Étape 2.2 : Intégration d'un Backend avec Firebase
+Objectif : Préparer l'application à gérer des utilisateurs et des données en ligne. Nous utiliserons Firebase de Google, qui est parfait pour ce genre de projet car il simplifie énormément le travail.
+
+Actions :
+
+Créer un Projet Firebase :
+
+Aller sur la console Firebase, créer un nouveau projet (c'est gratuit).
+
+Activer les Services :
+
+Activer Firestore Database (votre base de données en temps réel).
+
+Activer Firebase Authentication (pour gérer la connexion par Google).
+
+Configurer l'App :
+
+Ajouter les scripts de Firebase à votre index.html.
+
+Initialiser Firebase dans votre script.js avec les clés de configuration de votre projet.
+
+Étape 2.3 : Authentification des Utilisateurs
+Objectif : Permettre aux utilisateurs de se connecter et se déconnecter.
+
+Actions :
+
+Créer un Bouton "Connexion" :
+
+Ajouter un bouton "Se connecter avec Google" sur la page.
+
+Logique de Connexion (JS) :
+
+Écrire la fonction qui, au clic, ouvre la fenêtre de connexion Google.
+
+Gérer l'État de l'Utilisateur :
+
+Modifier l'interface en fonction de l'état de l'utilisateur : afficher son nom/photo et un bouton "Déconnexion" s'il est connecté, sinon afficher le bouton "Connexion". L'application principale sera cachée tant que l'utilisateur n'est pas connecté.
+
+Étape 2.4 : Migration des Données vers Firestore
+Objectif : Remplacer localStorage par la base de données en ligne Firestore pour que les données de chaque utilisateur soient sauvegardées sur son compte.
+
+Actions :
+
+Restructurer les Données :
+
+Dans Firestore, les données seront organisées par utilisateur. Par exemple : suivis/{id_de_l'utilisateur}/notes/{id_de_la_note}.
+
+Modifier les Fonctions de Sauvegarde :
+
+La fonction saveSuivis() n'écrira plus dans localStorage mais dans la base de données Firestore, en associant les données à l'ID de l'utilisateur connecté.
+
+Modifier les Fonctions de Chargement :
+
+La fonction loadSuivis() ira chercher les données dans Firestore correspondant à l'utilisateur actuellement connecté.
+
+Temps Réel :
+
+Utiliser les auditeurs temps réel de Firestore (onSnapshot) pour que le tableau se mette à jour instantanément si une donnée est modifiée (par exemple, depuis un autre appareil).
